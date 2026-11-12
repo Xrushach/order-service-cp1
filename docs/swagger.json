@@ -1,0 +1,345 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Сервис для управления заказами (домашнее задание).",
+        "title": "API заказов",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "paths": {
+        "/api/v1/orders": {
+            "get": {
+                "description": "Возвращает список всех заказов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить все заказы",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новый заказ, проверяет товары и считает сумму",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Создать заказ",
+                "parameters": [
+                    {
+                        "description": "данные заказа",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example_com_order-service_internal_order.CreateOrderInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}": {
+            "get": {
+                "description": "Возвращает один заказ по его номеру",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить заказ по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "ID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/history": {
+            "get": {
+                "description": "Показывает все изменения статуса заказа.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "История статусов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "ID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example_com_order-service_internal_order.StatusChange"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/status": {
+            "patch": {
+                "description": "Меняет статус, проверяя, можно ли это сделать",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Сменить статус заказа",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "ID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Новый статус",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example_com_order-service_internal_order.UpdateStatusInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "example_com_order-service_internal_order.CreateOrderInput": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example_com_order-service_internal_order.Item"
+                    }
+                }
+            }
+        },
+        "example_com_order-service_internal_order.Item": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "example_com_order-service_internal_order.Order": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example_com_order-service_internal_order.Item"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/example_com_order-service_internal_order.Status"
+                },
+                "total_price": {
+                    "type": "integer"
+                }
+            }
+        },
+        "example_com_order-service_internal_order.Status": {
+            "type": "string",
+            "enum": [
+                "new",
+                "processing",
+                "completed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "StatusNew",
+                "StatusProcessing",
+                "StatusCompleted",
+                "StatusCancelled"
+            ]
+        },
+        "example_com_order-service_internal_order.StatusChange": {
+            "type": "object",
+            "properties": {
+                "changed_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/example_com_order-service_internal_order.Status"
+                }
+            }
+        },
+        "example_com_order-service_internal_order.UpdateStatusInput": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/example_com_order-service_internal_order.Status"
+                }
+            }
+        },
+        "internal_handler.errorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
