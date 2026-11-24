@@ -48,6 +48,10 @@ func (s *OrderService) List(ctx context.Context) ([]order.Order, error) {
 }
 
 func (s *OrderService) UpdateStatus(ctx context.Context, id int64, status order.Status) (order.Order, error) {
+	if !statusIsValid(status) {
+		return order.Order{}, order.ErrInvalidStatus
+	}
+
 	currOrder, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return order.Order{}, err
@@ -63,6 +67,15 @@ func (s *OrderService) UpdateStatus(ctx context.Context, id int64, status order.
 	})
 
 	return s.repository.Update(ctx, currOrder)
+}
+
+func statusIsValid(s order.Status) bool {
+	switch s {
+	case order.StatusNew, order.StatusProcessing, order.StatusCompleted, order.StatusCancelled:
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *OrderService) History(ctx context.Context, id int64) ([]order.StatusChange, error) {

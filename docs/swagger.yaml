@@ -1,12 +1,19 @@
 definitions:
-  example_com_order-service_internal_order.CreateOrderInput:
+  handler.errorResponse:
+    properties:
+      code:
+        type: string
+      error:
+        type: string
+    type: object
+  order.CreateOrderInput:
     properties:
       items:
         items:
-          $ref: '#/definitions/example_com_order-service_internal_order.Item'
+          $ref: '#/definitions/order.Item'
         type: array
     type: object
-  example_com_order-service_internal_order.Item:
+  order.Item:
     properties:
       name:
         type: string
@@ -15,7 +22,7 @@ definitions:
       quantity:
         type: integer
     type: object
-  example_com_order-service_internal_order.Order:
+  order.Order:
     properties:
       created_at:
         type: string
@@ -23,14 +30,14 @@ definitions:
         type: integer
       items:
         items:
-          $ref: '#/definitions/example_com_order-service_internal_order.Item'
+          $ref: '#/definitions/order.Item'
         type: array
       status:
-        $ref: '#/definitions/example_com_order-service_internal_order.Status'
+        $ref: '#/definitions/order.Status'
       total_price:
         type: integer
     type: object
-  example_com_order-service_internal_order.Status:
+  order.Status:
     enum:
     - new
     - processing
@@ -42,24 +49,17 @@ definitions:
     - StatusProcessing
     - StatusCompleted
     - StatusCancelled
-  example_com_order-service_internal_order.StatusChange:
+  order.StatusChange:
     properties:
       changed_at:
         type: string
       status:
-        $ref: '#/definitions/example_com_order-service_internal_order.Status'
+        $ref: '#/definitions/order.Status'
     type: object
-  example_com_order-service_internal_order.UpdateStatusInput:
+  order.UpdateStatusInput:
     properties:
       status:
-        $ref: '#/definitions/example_com_order-service_internal_order.Status'
-    type: object
-  internal_handler.errorResponse:
-    properties:
-      code:
-        type: string
-      error:
-        type: string
+        $ref: '#/definitions/order.Status'
     type: object
 host: localhost:8080
 info:
@@ -78,12 +78,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/example_com_order-service_internal_order.Order'
+              $ref: '#/definitions/order.Order'
             type: array
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
       summary: Получить все заказы
       tags:
       - orders
@@ -97,22 +97,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/example_com_order-service_internal_order.CreateOrderInput'
+          $ref: '#/definitions/order.CreateOrderInput'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/example_com_order-service_internal_order.Order'
+            $ref: '#/definitions/order.Order'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
       summary: Создать заказ
       tags:
       - orders
@@ -121,7 +121,6 @@ paths:
       description: Возвращает один заказ по его номеру
       parameters:
       - description: ID заказа
-        format: int64
         in: path
         name: id
         required: true
@@ -132,19 +131,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/example_com_order-service_internal_order.Order'
+            $ref: '#/definitions/order.Order'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
       summary: Получить заказ по ID
       tags:
       - orders
@@ -153,7 +152,6 @@ paths:
       description: Показывает все изменения статуса заказа.
       parameters:
       - description: ID заказа
-        format: int64
         in: path
         name: id
         required: true
@@ -165,20 +163,20 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/example_com_order-service_internal_order.StatusChange'
+              $ref: '#/definitions/order.StatusChange'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
       summary: История статусов
       tags:
       - orders
@@ -189,7 +187,6 @@ paths:
       description: Меняет статус, проверяя, можно ли это сделать
       parameters:
       - description: ID заказа
-        format: int64
         in: path
         name: id
         required: true
@@ -199,31 +196,46 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/example_com_order-service_internal_order.UpdateStatusInput'
+          $ref: '#/definitions/order.UpdateStatusInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/example_com_order-service_internal_order.Order'
+            $ref: '#/definitions/order.Order'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_handler.errorResponse'
+            $ref: '#/definitions/handler.errorResponse'
       summary: Сменить статус заказа
       tags:
       - orders
+  /health:
+    get:
+      description: Возвращает статус работоспособности сервиса
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Проверка состояния сервиса
+      tags:
+      - health
 swagger: "2.0"

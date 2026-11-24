@@ -31,14 +31,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                                "$ref": "#/definitions/order.Order"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     }
                 }
@@ -62,7 +62,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example_com_order-service_internal_order.CreateOrderInput"
+                            "$ref": "#/definitions/order.CreateOrderInput"
                         }
                     }
                 ],
@@ -70,19 +70,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                            "$ref": "#/definitions/order.Order"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     }
                 }
@@ -101,7 +101,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "ID заказа",
                         "name": "id",
                         "in": "path",
@@ -112,25 +111,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                            "$ref": "#/definitions/order.Order"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     }
                 }
@@ -149,7 +148,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "ID заказа",
                         "name": "id",
                         "in": "path",
@@ -162,26 +160,26 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/example_com_order-service_internal_order.StatusChange"
+                                "$ref": "#/definitions/order.StatusChange"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     }
                 }
@@ -203,7 +201,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "ID заказа",
                         "name": "id",
                         "in": "path",
@@ -215,7 +212,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example_com_order-service_internal_order.UpdateStatusInput"
+                            "$ref": "#/definitions/order.UpdateStatusInput"
                         }
                     }
                 ],
@@ -223,31 +220,54 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/example_com_order-service_internal_order.Order"
+                            "$ref": "#/definitions/order.Order"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.errorResponse"
+                            "$ref": "#/definitions/handler.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Возвращает статус работоспособности сервиса",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Проверка состояния сервиса",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -255,18 +275,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "example_com_order-service_internal_order.CreateOrderInput": {
+        "handler.errorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.CreateOrderInput": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/example_com_order-service_internal_order.Item"
+                        "$ref": "#/definitions/order.Item"
                     }
                 }
             }
         },
-        "example_com_order-service_internal_order.Item": {
+        "order.Item": {
             "type": "object",
             "properties": {
                 "name": {
@@ -280,7 +311,7 @@ const docTemplate = `{
                 }
             }
         },
-        "example_com_order-service_internal_order.Order": {
+        "order.Order": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -292,18 +323,18 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/example_com_order-service_internal_order.Item"
+                        "$ref": "#/definitions/order.Item"
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/example_com_order-service_internal_order.Status"
+                    "$ref": "#/definitions/order.Status"
                 },
                 "total_price": {
                     "type": "integer"
                 }
             }
         },
-        "example_com_order-service_internal_order.Status": {
+        "order.Status": {
             "type": "string",
             "enum": [
                 "new",
@@ -318,33 +349,22 @@ const docTemplate = `{
                 "StatusCancelled"
             ]
         },
-        "example_com_order-service_internal_order.StatusChange": {
+        "order.StatusChange": {
             "type": "object",
             "properties": {
                 "changed_at": {
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/example_com_order-service_internal_order.Status"
+                    "$ref": "#/definitions/order.Status"
                 }
             }
         },
-        "example_com_order-service_internal_order.UpdateStatusInput": {
+        "order.UpdateStatusInput": {
             "type": "object",
             "properties": {
                 "status": {
-                    "$ref": "#/definitions/example_com_order-service_internal_order.Status"
-                }
-            }
-        },
-        "internal_handler.errorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
+                    "$ref": "#/definitions/order.Status"
                 }
             }
         }

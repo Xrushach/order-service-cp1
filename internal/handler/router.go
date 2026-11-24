@@ -45,6 +45,12 @@ func NewRouter(service OrderService, logger *slog.Logger) http.Handler {
 	return router
 }
 
+// @Summary Проверка состояния сервиса
+// @Description Возвращает статус работоспособности сервиса
+// @Tags health
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /health [get]
 func (h *Handler) health(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }

@@ -5,10 +5,49 @@ import (
 	"testing"
 
 	"example.com/order-service/internal/order"
-	"example.com/order-service/internal/repository/memory"
 	"example.com/order-service/internal/service"
 	"github.com/stretchr/testify/require"
 )
+
+type fakeRepo struct {
+	items  map[int64]order.Order
+	nextID int64
+}
+
+func newFakeRepo() *fakeRepo {
+	return &fakeRepo{items: make(map[int64]order.Order), nextID: 1}
+}
+
+func (r *fakeRepo) Create(_ context.Context, v order.Order) (order.Order, error) {
+	v.ID = r.nextID
+	r.nextID++
+	r.items[v.ID] = v
+	return v, nil
+}
+
+func (r *fakeRepo) GetByID(_ context.Context, id int64) (order.Order, error) {
+	o, ok := r.items[id]
+	if !ok {
+		return order.Order{}, order.ErrOrderNotFound
+	}
+	return o, nil
+}
+
+func (r *fakeRepo) List(_ context.Context) ([]order.Order, error) {
+	res := make([]order.Order, 0, len(r.items))
+	for _, o := range r.items {
+		res = append(res, o)
+	}
+	return res, nil
+}
+
+func (r *fakeRepo) Update(_ context.Context, v order.Order) (order.Order, error) {
+	if _, ok := r.items[v.ID]; !ok {
+		return order.Order{}, order.ErrOrderNotFound
+	}
+	r.items[v.ID] = v
+	return v, nil
+}
 
 func makeItems() []order.Item {
 	return []order.Item{
@@ -35,8 +74,7 @@ func TestCreateOrder(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := memory.NewOrderRepository()
-			svc := service.NewOrderService(repo)
+			svc := service.NewOrderService(newFakeRepo())
 
 			got, err := svc.Create(context.Background(), tt.input)
 			if tt.wantErr != nil {
@@ -56,8 +94,7 @@ func TestCreateOrder(t *testing.T) {
 }
 
 func TestGetByID(t *testing.T) {
-	repo := memory.NewOrderRepository()
-	svc := service.NewOrderService(repo)
+	svc := service.NewOrderService(newFakeRepo())
 
 	created, _ := svc.Create(context.Background(), order.CreateOrderInput{Items: makeItems()})
 
@@ -84,8 +121,7 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	repo := memory.NewOrderRepository()
-	svc := service.NewOrderService(repo)
+	svc := service.NewOrderService(newFakeRepo())
 
 	_, _ = svc.Create(context.Background(), order.CreateOrderInput{Items: makeItems()})
 	_, _ = svc.Create(context.Background(), order.CreateOrderInput{Items: makeItems()})
@@ -96,8 +132,7 @@ func TestList(t *testing.T) {
 }
 
 func TestHistory(t *testing.T) {
-	repo := memory.NewOrderRepository()
-	svc := service.NewOrderService(repo)
+	svc := service.NewOrderService(newFakeRepo())
 
 	created, _ := svc.Create(context.Background(), order.CreateOrderInput{Items: makeItems()})
 	_, _ = svc.UpdateStatus(context.Background(), created.ID, order.StatusProcessing)
@@ -113,7 +148,7 @@ func TestHistory(t *testing.T) {
 }
 
 func TestUpdateStatus(t *testing.T) {
-	svc := service.NewOrderService(memory.NewOrderRepository())
+	svc := service.NewOrderService(newFakeRepo())
 
 	cases := []struct {
 		name         string
@@ -125,6 +160,7 @@ func TestUpdateStatus(t *testing.T) {
 		{"new to cancelled", nil, order.StatusCancelled, nil},
 		{"processing to completed", []order.Status{order.StatusProcessing}, order.StatusCompleted, nil},
 		{"processing to cancelled", []order.Status{order.StatusProcessing}, order.StatusCancelled, nil},
+		{"unknown status", nil, order.Status("unknown"), order.ErrInvalidStatus},
 		{"invalid new to completed", nil, order.StatusCompleted, order.ErrInvalidStatusTransition},
 		{"invalid completed to processing", []order.Status{order.StatusProcessing, order.StatusCompleted}, order.StatusProcessing, order.ErrInvalidStatusTransition},
 		{"invalid cancelled to new", []order.Status{order.StatusCancelled}, order.StatusNew, order.ErrInvalidStatusTransition},
